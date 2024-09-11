@@ -1,15 +1,18 @@
--- Section 1: Create Tables
+
 CREATE TABLE authors (
     author_id INT PRIMARY KEY,
-    author_name VARCHAR(100),
-    university VARCHAR(100),
+    author_name VARCHAR(200),
+    university VARCHAR(350),
     date_of_birth DATE,
     h_index INT,
-    gender CHAR(1),
-    mentor INT,
-    FOREIGN KEY (mentor) REFERENCES authors(author_id)
+    gender CHAR(1)
 );
 
+-- Step 2: Add the mentor field as a foreign key separately
+ALTER TABLE authors ADD mentor INT;
+ALTER TABLE authors ADD CONSTRAINT fk_mentor FOREIGN KEY (mentor) REFERENCES authors(author_id);
+
+-- Create the research_papers table
 CREATE TABLE research_papers (
     paper_id INT PRIMARY KEY,
     paper_title VARCHAR(200),
@@ -17,6 +20,7 @@ CREATE TABLE research_papers (
     publish_date DATE
 );
 
+-- Create the author_papers table (linking authors and papers)
 CREATE TABLE author_papers (
     author_id INT,
     paper_id INT,
@@ -26,24 +30,34 @@ CREATE TABLE author_papers (
 );
 
 -- Section 2: Insert Data
+
+-- Inserting authors with and without mentors
 INSERT INTO authors (author_id, author_name, university, date_of_birth, h_index, gender, mentor) VALUES
 (1, 'Alice Smith', 'Harvard University', '1980-03-25', 42, 'F', NULL),
 (2, 'Bob Johnson', 'MIT', '1975-07-14', 39, 'M', 1),
--- Continue for other authors...
+(3, 'Carol White', 'Stanford University', '1985-09-08', 45, 'F', 1),
+(4, 'David Brown', 'UC Berkeley', '1972-11-19', 36, 'M', 2),
+(5, 'Eve Davis', 'Oxford University', '1988-01-30', 50, 'F', NULL);
 
+-- Inserting research papers
 INSERT INTO research_papers (paper_id, paper_title, conference, publish_date) VALUES
 (1, 'Quantum Computing Basics', 'QCON 2021', '2021-06-12'),
 (2, 'Advances in AI', 'AI World 2022', '2022-11-18'),
--- Continue for other papers...
+(3, 'Future of Cryptography', 'CryptoCon 2023', '2023-03-10');
 
+-- Linking authors to papers
 INSERT INTO author_papers (author_id, paper_id) VALUES
 (1, 1),
 (2, 2),
--- Continue to link other authors to papers...
+(3, 3),
+(1, 2),
+(4, 1),
+(5, 3);
 
 -- Section 3: Queries
 
 -- Exercise 3: Joins
+
 -- 1. Query to print names of all authors and their corresponding mentors
 SELECT a.author_name AS author, m.author_name AS mentor
 FROM authors a
@@ -56,6 +70,7 @@ LEFT JOIN author_papers ap ON a.author_id = ap.author_id
 LEFT JOIN research_papers rp ON ap.paper_id = rp.paper_id;
 
 -- Exercise 4: Aggregate Functions
+
 -- 1. All research papers and the number of authors that wrote that paper
 SELECT rp.paper_title, COUNT(ap.author_id) AS num_authors
 FROM research_papers rp
